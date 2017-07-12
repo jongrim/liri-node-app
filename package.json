@@ -1,0 +1,24 @@
+{
+  "name": "liri-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jongrim/liri-node-app.git"
+  },
+  "author": "Jonathan Grim",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jongrim/liri-node-app/issues"
+  },
+  "homepage": "https://github.com/jongrim/liri-node-app#readme",
+  "dependencies": {
+    "request": "^2.81.0",
+    "twitter": "^1.7.1"
+  }
+}
