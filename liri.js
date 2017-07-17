@@ -44,19 +44,21 @@ var app = (function() {
           console.log(chalk.red('No results for that song!'));
           return;
         }
-        let song = items[0];
 
-        console.log(chalk.blue('Song:'), song.name);
-        console.log(chalk.blue('Artist:'), song.artists[0].name);
-        console.log(chalk.blue('Album:'), song.album.name);
-        console.log(chalk.blue('Preview URL:'), song.preview_url);
+        let logText = { songs: [] };
 
-        let logText = {
-          song: song.name,
-          artist: song.artists[0].name,
-          album: song.album.name,
-          previewURL: song.preview_url
-        };
+        items.forEach(item => {
+          console.log(chalk.blue('Song:'), item.name);
+          console.log(chalk.blue('Artist:'), item.artists[0].name);
+          console.log(chalk.blue('Album:'), item.album.name);
+          console.log(chalk.blue('Preview URL:'), item.preview_url);
+          logText.songs.push({
+            song: item.name,
+            artist: item.artists[0].name,
+            album: item.album.name,
+            previewURL: item.preview_url
+          });
+        });
 
         appendData('spotify-this-song', JSON.stringify(logText));
       })
@@ -65,11 +67,8 @@ var app = (function() {
       });
   }
 
-  function movie(movieName) {
+  function movie(movieName = 'Mr. Nobody') {
     const log = console.log;
-    if (!movieName) {
-      movieName = 'Mr. Nobody';
-    }
     axios
       .get(`http://www.omdbapi.com/?apikey=${appKeys.omdb.key}&t=${movieName}`)
       .then(response => {
@@ -115,21 +114,8 @@ var app = (function() {
     });
   }
 
-  function loadFile(file) {
-    if (!file) {
-      file = './random.txt';
-    }
-    if (/^\./.test(file)) {
-      // file is a relative file
-      file = file.substr(1);
-      fs.readFile(__dirname + file, 'utf8', executeFile);
-    } else if (/^\//.test(file)) {
-      // file is absolute path
-      fs.readFile(file, 'utf8', executeFile);
-    } else {
-      // file is relative, without preceeding ./
-      fs.readFile(__dirname + '/' + file, 'utf8', executeFile);
-    }
+  function loadFile(file = 'random.txt') {
+    fs.readFile(file, 'utf8', executeFile);
   }
 
   function callOtherFunction(fn, arg) {
@@ -158,12 +144,19 @@ var app = (function() {
   };
 })();
 
+args = args.join(' ') || undefined;
+
 if (fn === 'my-tweets') {
   app.myTweets();
 } else if (fn === 'spotify-this-song') {
-  app.spotify(args.join(' '));
+  app.spotify(args);
 } else if (fn === 'movie-this') {
-  app.movie(args.join(' '));
+  app.movie(args);
 } else if (fn === 'do-what-it-says') {
-  app.loadFile(args.join(' '));
+  app.loadFile(args);
+} else {
+  console.log(
+    "I don't understand that command. Here's what I can do:\n\
+my-tweets\nspotify-this-song [song name]\nmovie-this [move title]\ndo-what-it-says [file]"
+  );
 }
