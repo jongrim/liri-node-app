@@ -17,7 +17,7 @@ var app = (function() {
       access_token_secret: appKeys.twitter.access_token_secret
     });
     const log = console.log;
-    client.get('search/tweets', { q: 'from:jonjongrim', count: count }, function(error, tweets, response) {
+    client.get('search/tweets', { q: 'from:jonjongrim', count: count }, function(error, tweets, data) {
       let msgArray = tweets.statuses;
       msgArray.forEach(msg => {
         let [wDay, month, date] = msg.created_at.split(' ');
@@ -53,13 +53,24 @@ var app = (function() {
   }
 
   function movie(movieName) {
+    const log = console.log;
     if (!movieName) {
       movieName = 'Mr. Nobody';
     }
     axios
       .get(`http://www.omdbapi.com/?apikey=${appKeys.omdb.key}&t=${movieName}`)
       .then(response => {
-        console.log(response);
+        let data = response.data;
+        log(chalk.blue('Title:'), data.Title);
+        log(chalk.blue('Year:'), data.Year);
+        log(chalk.blue('Ratings:'));
+        data.Ratings.forEach(rate => {
+          log(`  ${rate.Source}: ${rate.Value}`);
+        });
+        log(chalk.blue('Country:'), data.Country);
+        log(chalk.blue('Plot:'));
+        log(data.Plot);
+        log(chalk.blue('Actors:'), data.Actors);
       })
       .catch(err => {
         console.error(err);
