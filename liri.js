@@ -2,6 +2,7 @@
 var chalk = require('chalk');
 var fs = require('fs');
 var axios = require('axios');
+var moment = require('moment');
 var Twitter = require('twitter');
 var Spotify = require('node-spotify-api');
 var appKeys = require('./keys.js');
@@ -19,11 +20,14 @@ var app = (function() {
     const log = console.log;
     client.get('search/tweets', { q: 'from:jonjongrim', count: count }, function(error, tweets, data) {
       let msgArray = tweets.statuses;
+      let logText = { tweets: [] };
       msgArray.forEach(msg => {
         let [wDay, month, date] = msg.created_at.split(' ');
         log(chalk.blue(`Tweet at: ${wDay}, ${month} ${date}`));
         log(`${msg.text}`);
+        logText.tweets.push({ created_at: msg.created_at, tweet: msg.text });
       });
+      appendData('my-tweets', JSON.stringify(logText));
     });
   }
 
@@ -42,10 +46,19 @@ var app = (function() {
         }
         let song = items[0];
 
-        console.log(chalk.blue.underline(`Song: ${song.name}`));
-        console.log(`Artist: ${song.artists[0].name}`);
-        console.log(`Album: ${song.album.name}`);
-        console.log(`Preview URL: ${song.preview_url}`);
+        console.log(chalk.blue('Song:'), song.name);
+        console.log(chalk.blue('Artist:'), song.artists[0].name);
+        console.log(chalk.blue('Album:'), song.album.name);
+        console.log(chalk.blue('Preview URL:'), song.preview_url);
+
+        let logText = {
+          song: song.name,
+          artist: song.artists[0].name,
+          album: song.album.name,
+          previewURL: song.preview_url
+        };
+
+        appendData('spotify-this-song', JSON.stringify(logText));
       })
       .catch(err => {
         console.error(chalk.red(err));
@@ -61,6 +74,10 @@ var app = (function() {
       .get(`http://www.omdbapi.com/?apikey=${appKeys.omdb.key}&t=${movieName}`)
       .then(response => {
         let data = response.data;
+        if (data.Error) {
+          console.error(data.Error);
+          return;
+        }
         log(chalk.blue('Title:'), data.Title);
         log(chalk.blue('Year:'), data.Year);
         log(chalk.blue('Ratings:'));
@@ -71,6 +88,17 @@ var app = (function() {
         log(chalk.blue('Plot:'));
         log(data.Plot);
         log(chalk.blue('Actors:'), data.Actors);
+
+        let logText = {
+          title: data.Title,
+          year: data.Year,
+          ratings: data.Ratings,
+          country: data.Country,
+          plot: data.Plot,
+          actors: data.Actors
+        };
+
+        appendData('movie-this', JSON.stringify(logText));
       })
       .catch(err => {
         console.error(err);
@@ -112,6 +140,14 @@ var app = (function() {
     } else if (fn === 'movie-this') {
       movie(arg);
     }
+  }
+
+  function appendData(fn, data) {
+    fs.appendFile('log.txt', `${fn} ran at ${moment()}\n${data}\n`, 'utf8', err => {
+      if (err) {
+        console.error(err);
+      }
+    });
   }
 
   return {
