@@ -1,5 +1,7 @@
 'use strict';
 var chalk = require('chalk');
+var fs = require('fs');
+var axios = require('axios');
 var Twitter = require('twitter');
 var Spotify = require('node-spotify-api');
 var appKeys = require('./keys.js');
@@ -25,7 +27,7 @@ var app = (function() {
     });
   }
 
-  function spotify(songName) {
+  function spotify(songName = 'The Sign') {
     var spotify = new Spotify({
       id: appKeys.spotify.id,
       secret: appKeys.spotify.secret
@@ -50,9 +52,29 @@ var app = (function() {
       });
   }
 
+  function movie(movieName) {
+    if (!movieName) {
+      movieName = 'Mr. Nobody';
+    }
+    axios
+      .get(`http://www.omdbapi.com/?apikey=${appKeys.omdb.key}&t=${movieName}`)
+      .then(response => {
+        console.log(response);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  function executeFile() {
+    //
+  }
+
   return {
     myTweets: myTweets,
-    spotify: spotify
+    spotify: spotify,
+    movie: movie,
+    executeFile: executeFile
   };
 })();
 
@@ -60,4 +82,8 @@ if (fn === 'my-tweets') {
   app.myTweets();
 } else if (fn === 'spotify-this-song') {
   app.spotify(args.join(' '));
+} else if (fn === 'movie-this') {
+  app.movie(args.join(' '));
+} else if (fn === 'do-what-it-says') {
+  app.executeFile(args.join(' '));
 }

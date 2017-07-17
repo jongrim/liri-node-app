@@ -18,10 +18,10 @@
   },
   "homepage": "https://github.com/jongrim/liri-node-app#readme",
   "dependencies": {
+    "axios": "^0.16.2",
     "chalk": "^2.0.1",
     "moment": "^2.18.1",
     "node-spotify-api": "^1.0.5",
-    "request": "^2.81.0",
     "twitter": "^1.7.1"
   }
 }
