@@ -77,15 +77,48 @@ var app = (function() {
       });
   }
 
-  function executeFile() {
-    //
+  function executeFile(err, data) {
+    if (err) throw err;
+    var lines = data.split('\n');
+    lines.forEach(line => {
+      if (!line) return;
+      var [command, arg] = line.split(',');
+      callOtherFunction(command, arg.replace('"', ''));
+    });
+  }
+
+  function loadFile(file) {
+    if (!file) {
+      file = './random.txt';
+    }
+    if (/^\./.test(file)) {
+      // file is a relative file
+      file = file.substr(1);
+      fs.readFile(__dirname + file, 'utf8', executeFile);
+    } else if (/^\//.test(file)) {
+      // file is absolute path
+      fs.readFile(file, 'utf8', executeFile);
+    } else {
+      // file is relative, without preceeding ./
+      fs.readFile(__dirname + '/' + file, 'utf8', executeFile);
+    }
+  }
+
+  function callOtherFunction(fn, arg) {
+    if (fn === 'my-tweets') {
+      myTweets();
+    } else if (fn === 'spotify-this-song') {
+      spotify(arg);
+    } else if (fn === 'movie-this') {
+      movie(arg);
+    }
   }
 
   return {
     myTweets: myTweets,
     spotify: spotify,
     movie: movie,
-    executeFile: executeFile
+    loadFile: loadFile
   };
 })();
 
@@ -96,5 +129,5 @@ if (fn === 'my-tweets') {
 } else if (fn === 'movie-this') {
   app.movie(args.join(' '));
 } else if (fn === 'do-what-it-says') {
-  app.executeFile(args.join(' '));
+  app.loadFile(args.join(' '));
 }
